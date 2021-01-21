@@ -22,8 +22,6 @@ elecCharge=-1.602*10**-19  #C
 class electron():
     
     def __init__(self,x,v):
-        self.xcounter=0
-        self.vcounter=0
         self.x=x
         self.v=v
         self.poslist=np.zeros(n)
