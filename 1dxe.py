@@ -41,10 +41,10 @@ class electron():
         self.v=vnew
         self.AddVel(vnew,i)
     
-    def ChangeFor(self,fnew):
+    def ChangeFor(self,fnew):       #sets the new current net force on the electron
         self.f=fnew
  
-    def getFor(self):
+    def getFor(self):       #returns the net force on the electron
         return self.f
     
     def getPos(self):       #return the electron's position
@@ -112,31 +112,31 @@ def model1(z,t):
         return[dxdt,dvdt]
 
 for x in range (0,n):
-    pos_now = []
+    pos_now = [] #an erray with each electron's current position
     for electron in electrons:
         pos_now.append(electron.getPos())
     
     for electron in electrons:
         fnet = 0
-        distances = np.zeros(num_e)
+        distances = np.zeros(num_e) #array of distances from each electron to current electron
         for i in range (num_e):
             distances[i] = getDistance(electron.getPos(),pos_now[i])
         #print(distances)
         
-        for i in range (num_e):
-            if (distances[i]==0):
+        for i in range (num_e): #calculates net force on electron from other electrons
+            if (distances[i]==0): #avoids divide by 0 error from distance of electron to itself
                 force = 0
             if (distances[i]>0):
-                force = k*(elecCharge**2)/((distances[i]**2)) #force will push electron right
+                force = k*(elecCharge**2)/((distances[i]**2)) #if electron is to the right, force will push electron right
             if (distances[i]<0):
-                force = -k*(elecCharge**2)/((distances[i]**2)) #force will push electron left
+                force = -k*(elecCharge**2)/((distances[i]**2)) #if electron is to the left, force will push electron left
             
-            fnet = fnet + force
+            fnet = fnet + force #sums force on electron from each other electron
                 
         electron.ChangeFor(fnet)
     
     
-    for electron in electrons:
+    for electron in electrons: #computes new pos and vel of each electron from net forces on them
         z = odeint(model1,electron.getPosVel(),t)
         z0=z[1]
         electron.ChangePos(z0[0],x)
@@ -156,7 +156,6 @@ for electron in electrons:
 
 plt.show()
         
-
     
 
     
