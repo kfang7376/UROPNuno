@@ -17,7 +17,6 @@ from random import randrange
 #import matplotlib.animation as animation
 
 #constants
-NumElec= 2   #unused so far
 eps= 8.854*10**-12   #C^2/(N*m^2)
 k= 1/(4*math.pi*eps)   #kg⋅m³⋅s⁻²⋅C^-2
 mass= 9.109*10**-31     #kg
@@ -26,7 +25,7 @@ elecCharge=-1.602*10**-19  #C
 #create electrons
 class electron():
     
-    def __init__(self,x,v,f):
+    def __init__(self,x,v,f):   #added new attribute that tells what the net force on the electron is
         self.x=x
         self.v=v
         self.f=f
@@ -91,17 +90,20 @@ def getDistance(d1,d2):       #finds the distance from some other position
 #sets the timepoints
 n=10000
 t=np.linspace(0,5,n)
-    
-num_e = 3 #number of electrons in system
 
-electrons = []
+initpos = [5,10,-12,-3,14]
+    
+num_e = len(initpos) #number of electrons in system
+
+electrons = [] #list of electrons
 
 for i in range (num_e):  #creates num_e number of electrons w/ rand pos and 0 vel
-    x0 = random.randint(0, 10)
+    x0 = initpos[i]
     v0 = 0
     f0 = 0
     electrons.append(electron(x0,v0,f0)) #adds new instance of electron to an array
     print(x0)
+    
 
 def model1(z,t):
         v=z[1] #sets v equal to 2nd imputed array position
@@ -109,13 +111,10 @@ def model1(z,t):
         dxdt=v
         return[dxdt,dvdt]
 
-for x in range (1,n):
+for x in range (0,n):
     pos_now = []
     for electron in electrons:
         pos_now.append(electron.getPos())
-    #print(pos_now)
-        
-    #fnets = []
     
     for electron in electrons:
         fnet = 0
@@ -135,9 +134,6 @@ for x in range (1,n):
             fnet = fnet + force
                 
         electron.ChangeFor(fnet)
-        #fnets.append(fnet)
-        #print(fnet)
-        #print(electron.getFor())
     
     
     for electron in electrons:
@@ -148,32 +144,18 @@ for x in range (1,n):
  
 for electron in electrons:
     plt.plot(t,electron.getPosList())
-#plt.plot(t,e2.getPosList(),'g-')
     plt.xlabel('time')
     plt.ylabel('position')
-#plt.legend(['e1','e2'])
+
+plt.show()
+    
+for electron in electrons:
+    plt.plot(t,electron.getVelList())
+    plt.xlabel('time')
+    plt.ylabel('velocity')
 
 plt.show()
         
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
 
     
 
