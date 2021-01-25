@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Fri Jan 22 23:06:29 2021
 
@@ -17,6 +15,7 @@ from random import randrange
 #import matplotlib.animation as animation
 
 #constants
+NumElec= 2   #unused so far
 eps= 8.854*10**-12   #C^2/(N*m^2)
 k= 1/(4*math.pi*eps)   #kg⋅m³⋅s⁻²⋅C^-2
 mass= 9.109*10**-31     #kg
@@ -25,7 +24,7 @@ elecCharge=-1.602*10**-19  #C
 #create electrons
 class electron():
     
-    def __init__(self,x,v,f):   #added new attribute that tells what the net force on the electron is
+    def __init__(self,x,v,f):
         self.x=x
         self.v=v
         self.f=f
@@ -41,10 +40,10 @@ class electron():
         self.v=vnew
         self.AddVel(vnew,i)
     
-    def ChangeFor(self,fnew):       #sets the new current net force on the electron
+    def ChangeFor(self,fnew):
         self.f=fnew
  
-    def getFor(self):       #returns the net force on the electron
+    def getFor(self):
         return self.f
     
     def getPos(self):       #return the electron's position
@@ -87,11 +86,19 @@ class electron():
 def getDistance(d1,d2):       #finds the distance from some other position
     return (d1-d2)
 
+#calculates potential energy
+def ElecPot(k,Q,dist):
+    return (k*Q**2)/dist
+
+#calculates kinetic energy
+def Kinetic(mass,vel):
+    return (1/2)*mass*(vel**2)
+
 #sets the timepoints
 n=10000
 t=np.linspace(0,5,n)
 
-initpos = [5,10,-12,-3,14]
+initpos = [6,-4,34,26,-30,-25,-17,17]
     
 num_e = len(initpos) #number of electrons in system
 
@@ -102,45 +109,78 @@ for i in range (num_e):  #creates num_e number of electrons w/ rand pos and 0 ve
     v0 = 0
     f0 = 0
     electrons.append(electron(x0,v0,f0)) #adds new instance of electron to an array
-    print(x0)
-    
+    #print(x0)
 
 def model1(z,t):
         v=z[1] #sets v equal to 2nd imputed array position
         dvdt= electron.getFor()/mass
         dxdt=v
         return[dxdt,dvdt]
+    
+ke = np.zeros(n)
+pe = np.zeros(n)
+totale = np.zeros(n)
+
+ke[0] = 0
+pe[0] = 0
+totale[0] = ke[0] + pe[0]
 
 for x in range (0,n):
-    pos_now = [] #an erray with each electron's current position
+    ke_now = 0
+    pos_now = []
+    
     for electron in electrons:
         pos_now.append(electron.getPos())
+        ke_now = ke_now+Kinetic(mass, electron.getVel())  
+        
+    ke[x] = ke_now
+    
+   
+    pe_now = 0
+    counter = 0
+    for electron in electrons:
+        for i in range (counter,num_e):
+            pedist = getDistance(electron.getPos(), pos_now[i])
+            if (pedist != 0):
+                pe_now = pe_now + ElecPot(k, elecCharge, abs(pedist))
+        counter = counter +1           
+    
+    pe[x] = pe_now
+    totale[x] = pe[x] + ke[x]
     
     for electron in electrons:
         fnet = 0
-        distances = np.zeros(num_e) #array of distances from each electron to current electron
+        distances = np.zeros(num_e)
         for i in range (num_e):
             distances[i] = getDistance(electron.getPos(),pos_now[i])
         #print(distances)
         
-        for i in range (num_e): #calculates net force on electron from other electrons
-            if (distances[i]==0): #avoids divide by 0 error from distance of electron to itself
+        for i in range (num_e):
+            if (distances[i]==0):
                 force = 0
             if (distances[i]>0):
-                force = k*(elecCharge**2)/((distances[i]**2)) #if electron is to the right, force will push electron right
+                force = k*(elecCharge**2)/((distances[i]**2)) #force will push electron right
             if (distances[i]<0):
-                force = -k*(elecCharge**2)/((distances[i]**2)) #if electron is to the left, force will push electron left
+                force = -k*(elecCharge**2)/((distances[i]**2)) #force will push electron left
             
-            fnet = fnet + force #sums force on electron from each other electron
+            fnet = fnet + force
                 
         electron.ChangeFor(fnet)
+        #fnets.append(fnet)
+        #print(fnet)
+        #print(electron.getFor())
     
-    
-    for electron in electrons: #computes new pos and vel of each electron from net forces on them
+    for electron in electrons:
         z = odeint(model1,electron.getPosVel(),t)
         z0=z[1]
         electron.ChangePos(z0[0],x)
         electron.ChangeVel(z0[1],x)
+        
+    #print(totale[x])
+    
+    #print([x,electron.getPosListi(x),electron.getVelListi(x)])
+        
+        
  
 for electron in electrons:
     plt.plot(t,electron.getPosList())
@@ -155,9 +195,13 @@ for electron in electrons:
     plt.ylabel('velocity')
 
 plt.show()
-        
-    
 
-    
 
-    
+plt.plot(t,totale,'g-')
+plt.plot(t,pe,'r-')
+plt.plot(t,ke,'b-')
+plt.xlabel('time')
+plt.ylabel('energy')
+plt.legend(['total','PE','KE'])
+#plt.axis([-0.5,60,0,(1.5)*(10**-28)])
+plt.show()
