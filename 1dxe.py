@@ -1,3 +1,6 @@
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Created on Fri Jan 22 23:06:29 2021
 
@@ -5,6 +8,17 @@ Created on Fri Jan 22 23:06:29 2021
 """
 
 #1/25 allow arbitrary # of electrons
+#notes 1/25 simulate random electrons
+    #implement own odesolver (not urgent)
+    #repulsive electric field
+        #electrons may gain enough energy to escape?
+        #discard those electrons --> remove from array
+
+#notes 1/25 simulate random electrons
+    #implement own odesolver (not urgent)
+    #repulsive electric field
+        #electrons may gain enough energy to escape?
+        #discard those electrons --> remove from array
 
 import math
 import numpy as np
@@ -98,9 +112,17 @@ def Kinetic(mass,vel):
 n=10000
 t=np.linspace(0,5,n)
 
-initpos = [6,-4,34,26,-30,-25,-17,17]
+# initpos = [-3,3,0]
     
-num_e = len(initpos) #number of electrons in system
+# num_e = len(initpos) #number of electrons in system
+
+num_e = 5 #number of electrons in system
+initpos=[]
+while(len(initpos)<num_e):
+    for i in range(num_e):
+              r=random.uniform(-20,20)
+              if r not in initpos: initpos.append(r)
+              
 
 electrons = [] #list of electrons
 
@@ -109,7 +131,7 @@ for i in range (num_e):  #creates num_e number of electrons w/ rand pos and 0 ve
     v0 = 0
     f0 = 0
     electrons.append(electron(x0,v0,f0)) #adds new instance of electron to an array
-    #print(x0)
+    print(x0)
 
 def model1(z,t):
         v=z[1] #sets v equal to 2nd imputed array position
@@ -205,3 +227,7 @@ plt.ylabel('energy')
 plt.legend(['total','PE','KE'])
 #plt.axis([-0.5,60,0,(1.5)*(10**-28)])
 plt.show()
+
+
+
+    
